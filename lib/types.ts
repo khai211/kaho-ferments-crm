@@ -21,6 +21,15 @@ export type SequenceStep = {
   body: string;
   is_birthday: boolean;
   active: boolean;
+  /** What delay_days is relative to: "paid_at" (default) or "fulfilment_date". */
+  anchor: "paid_at" | "fulfilment_date";
+};
+
+export type Fulfilment = {
+  type?: string;
+  date?: string;
+  time?: string;
+  location?: string;
 };
 
 /** Payload shape for POST /api/webhooks/mock-store-order — stands in for
@@ -36,4 +45,6 @@ export type MockOrderPayload = {
   items: { name: string; qty: number; unit_price: number }[];
   total: number;
   paid_at: string;
+  /** Present for pickup/delivery orders — absent for orders with no scheduled slot. */
+  fulfilment?: Fulfilment;
 };

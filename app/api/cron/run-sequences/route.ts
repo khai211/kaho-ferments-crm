@@ -9,7 +9,13 @@ type DueSendRow = {
   id: string;
   customers: Pick<Customer, "name" | "email" | "birthday_capture_token"> | null;
   sequence_steps: Pick<SequenceStep, "subject" | "body"> | null;
-  orders: { reference: string; order_items: { item_name: string }[] } | null;
+  orders: {
+    reference: string;
+    order_items: { item_name: string }[];
+    fulfilment_date: string | null;
+    fulfilment_time: string | null;
+    fulfilment_location: string | null;
+  } | null;
 };
 
 // Meant to be hit on a daily schedule (Vercel Cron once deployed, or a
@@ -27,7 +33,7 @@ export async function GET(request: NextRequest) {
   const { data: dueSends, error: dueError } = await supabase
     .from("sequence_sends")
     .select(
-      "id, customers(name, email, birthday_capture_token), sequence_steps(subject, body), orders(reference, order_items(item_name))"
+      "id, customers(name, email, birthday_capture_token), sequence_steps(subject, body), orders(reference, order_items(item_name), fulfilment_date, fulfilment_time, fulfilment_location)"
     )
     .eq("status", "pending")
     .lte("due_at", new Date().toISOString())
@@ -50,6 +56,9 @@ export async function GET(request: NextRequest) {
         customer,
         order: order ? { reference: order.reference } : undefined,
         items: order?.order_items.map((i) => ({ name: i.item_name })),
+        fulfilment: order
+          ? { date: order.fulfilment_date, time: order.fulfilment_time, location: order.fulfilment_location }
+          : undefined,
       });
       await sendEmail({
         to: customer.email,

@@ -7,6 +7,11 @@ import type { MockOrderPayload } from "@/lib/types";
 // order.created/order.updated events) — see README for sandbox setup.
 // Field names below (phone_number, quantity, unit_price, etc.) come from
 // HitPay's documented order.created example payload.
+// fulfilment_type/slot_date/slot_time/pickup are from HitPay's documented
+// example payload, but Kaho Ferments' sandbox store doesn't have
+// pickup/delivery configured yet — these fields are read defensively
+// (never block processing if absent/differently-shaped) until we can
+// confirm the real shape against a live pickup and delivery order.
 type HitPayOrderPayload = {
   id: string;
   payment_status: string;
@@ -14,6 +19,10 @@ type HitPayOrderPayload = {
   closed_at: string | null;
   updated_at: string;
   created_at: string;
+  fulfilment_type?: string | null;
+  slot_date?: string | null;
+  slot_time?: string | null;
+  pickup?: { location_name?: string | null; address?: string | null } | null;
   customer: {
     name: string;
     email?: string | null;
@@ -88,6 +97,14 @@ export async function POST(request: NextRequest) {
     })),
     total: order.amount,
     paid_at: order.closed_at ?? order.updated_at ?? order.created_at,
+    fulfilment: order.slot_date
+      ? {
+          type: order.fulfilment_type ?? undefined,
+          date: order.slot_date,
+          time: order.slot_time ?? undefined,
+          location: order.pickup?.location_name ?? order.pickup?.address ?? undefined,
+        }
+      : undefined,
   };
 
   try {

@@ -58,10 +58,13 @@ export function SequenceStepEditor({ step }: { step: SequenceStep }) {
 
       {!step.is_birthday ? (
         <div>
-          <label className="text-sm font-medium text-zinc-700">Send after (days)</label>
+          <label className="text-sm font-medium text-zinc-700">
+            {step.anchor === "fulfilment_date"
+              ? "Send before pickup/delivery (days, e.g. -1)"
+              : "Send after purchase (days)"}
+          </label>
           <input
             type="number"
-            min={0}
             value={delayDays}
             onChange={(e) => {
               setDelayDays(Number(e.target.value));
@@ -96,7 +99,8 @@ export function SequenceStepEditor({ step }: { step: SequenceStep }) {
           className="mt-1 w-full rounded-lg border border-zinc-300 p-2.5 font-mono text-sm focus:border-zinc-900 focus:outline-none"
         />
         <p className="mt-1 text-xs text-zinc-400">
-          Merge tags: {"{{first_name}}"}, {"{{flavor}}"}, {"{{order_reference}}"}, {"{{birthday_link}}"}
+          Merge tags: {"{{first_name}}"}, {"{{flavor}}"}, {"{{order_reference}}"}, {"{{birthday_link}}"},{" "}
+          {"{{pickup_date}}"}, {"{{pickup_time}}"}, {"{{pickup_location}}"}
         </p>
       </div>
 

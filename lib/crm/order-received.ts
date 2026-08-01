@@ -95,6 +95,10 @@ export async function handleOrderReceived(
       idempotency_key: order_reference,
       customer_id: customer.id,
       source,
+      fulfilment_type: payload.fulfilment?.type,
+      fulfilment_date: payload.fulfilment?.date,
+      fulfilment_time: payload.fulfilment?.time,
+      fulfilment_location: payload.fulfilment?.location,
     })
     .select("*")
     .single();
@@ -125,10 +129,23 @@ export async function handleOrderReceived(
   if (stepsError) throw stepsError;
 
   const paidAtMs = new Date(paid_at).getTime();
-  const mergeVars = buildMergeVars({ customer, order: { reference: order.reference }, items });
+  const dayMs = 24 * 60 * 60 * 1000;
+  const mergeVars = buildMergeVars({
+    customer,
+    order: { reference: order.reference },
+    items,
+    fulfilment: { date: order.fulfilment_date, time: order.fulfilment_time, location: order.fulfilment_location },
+  });
 
   for (const step of steps ?? []) {
-    const dueAt = new Date(paidAtMs + step.delay_days * 24 * 60 * 60 * 1000).toISOString();
+    let dueAt: string;
+    if (step.anchor === "fulfilment_date") {
+      // No slot on this order (e.g. it wasn't a scheduled pickup/delivery) — nothing to remind about.
+      if (!order.fulfilment_date) continue;
+      dueAt = new Date(new Date(`${order.fulfilment_date}T00:00:00Z`).getTime() + step.delay_days * dayMs).toISOString();
+    } else {
+      dueAt = new Date(paidAtMs + step.delay_days * dayMs).toISOString();
+    }
 
     const { data: send, error: sendError } = await supabase
       .from("sequence_sends")
