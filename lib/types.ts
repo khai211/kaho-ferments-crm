@@ -1,31 +1,3 @@
-export type MenuItem = {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  category: string;
-  image: string | null;
-  available: boolean;
-};
-
-export type OrderStatus = "pending" | "paid" | "failed" | "cancelled" | "expired";
-
-export type OrderItemRecord = {
-  item_name: string;
-  unit_price: number;
-  qty: number;
-  notes: string | null;
-};
-
-export type OrderRecord = {
-  reference: string;
-  customer_name: string;
-  table_number: string | null;
-  total: number;
-  status: OrderStatus;
-  created_at: string;
-};
-
 export type Customer = {
   id: string;
   name: string | null;

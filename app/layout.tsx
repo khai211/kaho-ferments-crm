@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { CartProvider } from "@/lib/cart-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Order Menu",
-  description: "Browse the menu and order for dine-in.",
+  title: "Kaho Ferments CRM",
+  description: "Customer database and post-purchase email automation.",
 };
 
 export const viewport: Viewport = {
@@ -33,9 +32,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900">
-        <CartProvider>{children}</CartProvider>
-      </body>
+      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900">{children}</body>
     </html>
   );
 }
