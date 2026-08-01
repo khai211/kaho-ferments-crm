@@ -48,17 +48,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!verifyWebhookSignature(rawBody, request.headers.get("hitpay-signature"), salt)) {
-    // TEMP DEBUG — remove after diagnosing salt mismatch. Never logs the value itself.
-    return NextResponse.json(
-      {
-        error: "Invalid signature",
-        debug_salt_length: salt.length,
-        debug_salt_first2: salt.slice(0, 2),
-        debug_salt_last2: salt.slice(-2),
-        debug_has_whitespace: /\s/.test(salt),
-      },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   // Only "order" events carry the customer + line items this CRM needs.
